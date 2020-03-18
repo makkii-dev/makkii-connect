@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import SocketIOClientStatic from "socket.io-client";
-import e from "express";
 const SYNC_COMMAND = "ADAPTER:SYNC";
 
 enum PayloadStatus {
@@ -69,7 +68,7 @@ class ConnectorAdapter {
     // define function
     callbacks: Map<string, Callback> = new Map();
 
-    // pedning msg
+    // pending msg
     needWait: Array<MsgPayload<any>> = [];
 
     // bind function
