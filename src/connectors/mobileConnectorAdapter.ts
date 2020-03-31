@@ -2,14 +2,13 @@ import ConnectorAdapter, { Deferred } from "./connectorAdapter";
 import SocketIOClientStatic from "socket.io-client";
 
 class MobileConnectorAdapter extends ConnectorAdapter {
-    connID = "";
     isConnectToServer = false;
-    referred = new Deferred();
+    deferred = new Deferred();
     chatBrowser: (...args: any) => Promise<any> = () =>
         Promise.reject("not connect");
 
-    constructor(sokect: SocketIOClientStatic["Socket"]) {
-        super(sokect, "mobile");
+    constructor(socket: SocketIOClientStatic["Socket"]) {
+        super({ socket, prefix: "mobile" });
     }
 
     getAccount = (): any => {
@@ -24,31 +23,38 @@ class MobileConnectorAdapter extends ConnectorAdapter {
         console.log(msg);
     };
 
-    register = (id: string): Promise<any> => {
+    register = (id: string, sig: string): Promise<any> => {
         const payload = {
             from: "mobile",
-            id
+            id,
+            signature: sig
         };
-        this.referred = new Deferred();
+        this.deferred = new Deferred();
         this.socket.emit("register", payload);
         this.socket.removeEventListener("register", this.registerListener);
         this.socket.addEventListener("register", this.registerListener);
-        return this.referred;
+        return this.deferred;
+    };
+
+    init = (): void => {
+        this.baseInit();
+        // sync
+        this.define("chatMobile", this.chat);
+        this.define("getAccount", this.getAccount);
+        this.define("sendTransaction", this.sendTransaction);
+        this.chatBrowser = this.bind("chatBrowser");
     };
 
     registerListener = (payload: any): void => {
-        const { success, id } = payload;
-        this.isConnectToServer = success;
-        this.connID = id;
-        if (success) {
-            this.referred.resolve(payload);
-            // sync
-            this.define("chatMobile", this.chat);
-            this.define("getAccount", this.getAccount);
-            this.define("sendTransaction", this.sendTransaction);
-            this.chatBrowser = this.bind("chatBrowser");
+        const { result, body } = payload;
+        if (result) {
+            const { channel } = body;
+            // register success
+            this.setChannel(channel);
+            this.init();
+            this.deferred.resolve({ result: true });
         } else {
-            this.referred.reject("regester failed");
+            this.deferred.reject(payload);
         }
     };
 }
