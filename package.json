@@ -1,12 +1,13 @@
 {
   "name": "socket-bridge",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
     "lint": "eslint src/** --ext ts  --fix",
     "compile": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "postinstall": "npm run compile"
   },
   "husky": {
     "hooks": {

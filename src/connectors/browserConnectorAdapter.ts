@@ -73,7 +73,7 @@ class BrowserConnectorAdapter extends ConnectorAdapter {
             const sig = this.genSig(channel);
             this.deferred.resolve({
                 result: true,
-                body: { sigature: sig, id }
+                body: { signature: sig, id }
             });
         } else {
             this.deferred.reject(payload);
