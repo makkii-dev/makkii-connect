@@ -20,7 +20,9 @@ const genChannel = (): string => {
         .update(buffer)
         .digest();
     const str: string = base64.encode(Buffer.from(hash).toString("hex"));
-    return str.substr(0, 5);
+    return str.substr(0, 10);
 };
 
-export { stripZeroXString, genUID, genChannel };
+const EXPIRATION = 5 * 60 * 1000;
+
+export { stripZeroXString, genUID, genChannel, EXPIRATION };

@@ -21,16 +21,16 @@ soc.on("connection", socket => {
             const socketMap = new SocketMap();
             const ret = socketMap.setBrowserSocket(socket, pubkey);
             if (ret.result) {
-                const idx = ret.channel!;
                 socketMap.setDisconnectHandler((id: string) => {
                     Maps.delete(id);
                 });
-                Maps.set(idx, socketMap);
+                Maps.set(ret.channel!, socketMap);
                 socket.emit("register", {
                     result: true,
                     body: {
                         channel: ret.channel,
-                        id: idx
+                        timestamp: ret.timestamp,
+                        expiration: ret.expiration
                     }
                 });
             } else {
@@ -40,8 +40,8 @@ soc.on("connection", socket => {
                 });
             }
         } else if (payload.from === "mobile") {
-            const { id, signature = "" } = payload;
-            const socketMap = Maps.get(id);
+            const { channel, signature = "" } = payload;
+            const socketMap = Maps.get(channel);
             if (typeof socketMap === "undefined") {
                 socket.emit("register", {
                     result: false,

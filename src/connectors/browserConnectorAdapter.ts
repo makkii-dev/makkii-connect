@@ -67,21 +67,22 @@ class BrowserConnectorAdapter extends ConnectorAdapter {
     registerListener = (payload: any): void => {
         const { result, body } = payload;
         if (result) {
-            const { channel, id } = body;
+            const { channel, id, timestamp, expiration } = body;
             this.setChannel(channel);
             this.init();
-            const sig = this.genSig(channel);
+            const sig = this.signMsg(channel, timestamp, expiration);
             this.deferred.resolve({
                 result: true,
-                body: { signature: sig, id }
+                body: { signature: sig, id, timestamp, expiration }
             });
         } else {
             this.deferred.reject(payload);
         }
     };
-    genSig = (msg: string): string => {
+
+    signMsg = (msg: string, timestamp: number, expiration: number): string => {
         const hash = blake2b(32)
-            .update(Buffer.from(msg))
+            .update(Buffer.from(`${msg}:${Math.ceil(timestamp / expiration)}`))
             .digest();
         const sig = nacl.sign.detached(hash, Buffer.from(this.priKey, "hex"));
         return Buffer.from(sig).toString("hex");

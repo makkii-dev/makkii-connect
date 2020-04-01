@@ -23,10 +23,10 @@ class MobileConnectorAdapter extends ConnectorAdapter {
         console.log(msg);
     };
 
-    register = (id: string, sig: string): Promise<any> => {
+    register = (channel: string, sig: string): Promise<any> => {
         const payload = {
             from: "mobile",
-            id,
+            channel,
             signature: sig
         };
         this.deferred = new Deferred();

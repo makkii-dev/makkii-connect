@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Socket } from "socket.io";
-import { genChannel, stripZeroXString } from "./utils";
+import { genChannel, stripZeroXString, EXPIRATION } from "./utils";
 import nacl from "tweetnacl";
 
 const blake2b = require("blake2b");
@@ -12,8 +12,8 @@ type DisconnectHandler = (id: string) => void;
 class SocketMap {
     private browserSocket: Connector;
     private mobileSocket: Connector;
-
     private browserPubkey = "";
+    private timestamp = 0;
 
     mobileWaitings: Array<any> = [];
     browserWaitings: Array<any> = [];
@@ -39,6 +39,8 @@ class SocketMap {
         result: boolean;
         channel?: string;
         reason?: string;
+        timestamp?: number;
+        expiration?: number;
     } => {
         if (
             typeof pubkey !== "string" ||
@@ -49,8 +51,26 @@ class SocketMap {
         this.browserSocket = socket;
         this.browserPubkey = pubkey;
         this.channel = genChannel();
+        this.timestamp = Date.now();
         this.setSessionListners();
-        return { result: true, channel: this.channel };
+        setTimeout(() => {
+            if (
+                !(
+                    this.browserSocket &&
+                    this.mobileSocket &&
+                    this.browserSocket.connected &&
+                    this.mobileSocket.connected
+                )
+            ) {
+                this.disconnectHandler(this.channel);
+            }
+        }, EXPIRATION);
+        return {
+            result: true,
+            channel: this.channel,
+            timestamp: this.timestamp,
+            expiration: EXPIRATION
+        };
     };
 
     setMobileSocket = (
@@ -62,7 +82,11 @@ class SocketMap {
         }
 
         const msg = blake2b(32)
-            .update(Buffer.from(this.channel))
+            .update(
+                Buffer.from(
+                    `${this.channel}:${Math.ceil(Date.now() / EXPIRATION)}`
+                )
+            )
             .digest();
 
         const res = nacl.sign.detached.verify(
@@ -71,7 +95,10 @@ class SocketMap {
             Buffer.from(stripZeroXString(this.browserPubkey), "hex")
         );
         if (!res) {
-            return { result: false, reason: "invalid sigture" };
+            return {
+                result: false,
+                reason: "invalid signture or signature timeout"
+            };
         }
         if (typeof this.mobileSocket != "undefined") {
             return { result: false, reason: "this channel already use" };
@@ -117,12 +144,12 @@ class SocketMap {
     };
 
     setSessionListners = (): void => {
-        this.browserSocket?.removeAllListeners("session");
-        this.mobileSocket?.removeAllListeners("session");
-        this.browserSocket?.addListener("session", () =>
+        this.browserSocket?.removeAllListeners(`session:${this.channel}`);
+        this.mobileSocket?.removeAllListeners(`session:${this.channel}`);
+        this.browserSocket?.addListener(`session:${this.channel}`, () =>
             this.sessionListener(this.browserSocket!)
         );
-        this.mobileSocket?.addListener("session", () =>
+        this.mobileSocket?.addListener(`session:${this.channel}`, () =>
             this.sessionListener(this.mobileSocket!)
         );
     };
@@ -152,7 +179,7 @@ class SocketMap {
             this.browserSocket.connected &&
             this.mobileSocket.connected
         ) {
-            sender.emit("session", {
+            sender.emit(`session:${this.channel}`, {
                 connect: true,
                 browser: {
                     id: this.browserSocket.id,
@@ -164,7 +191,7 @@ class SocketMap {
                 }
             });
         }
-        sender.emit("session", {
+        sender.emit(`session:${this.channel}`, {
             connect: false
         });
     };

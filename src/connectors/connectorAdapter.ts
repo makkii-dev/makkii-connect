@@ -62,8 +62,8 @@ type BindFunction = (...args: any) => Deferred<any>;
 class ConnectorAdapter {
     private uid = 0;
     socket: SocketIOClientStatic["Socket"];
-    channel: string | undefined;
-    prefix: string | undefined;
+    private channel: string | undefined;
+    private prefix: string | undefined;
     // msg transaction
     private transactions: Map<string, Deferred<any>> = new Map();
 
@@ -119,9 +119,12 @@ class ConnectorAdapter {
                         reject("session not open or be closed");
                     }
                 };
-                this.socket.removeEventListener("session");
-                this.socket.addEventListener("session", listener);
-                this.socket.emit("session", {});
+                this.socket.removeEventListener(`session:${this.channel}`);
+                this.socket.addEventListener(
+                    `session:${this.channel}`,
+                    listener
+                );
+                this.socket.emit(`session:${this.channel}`, {});
             }
         });
     };
