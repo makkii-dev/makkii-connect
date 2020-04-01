@@ -67,13 +67,13 @@ class BrowserConnectorAdapter extends ConnectorAdapter {
     registerListener = (payload: any): void => {
         const { result, body } = payload;
         if (result) {
-            const { channel, id, timestamp, expiration } = body;
+            const { channel, timestamp, expiration } = body;
             this.setChannel(channel);
             this.init();
             const sig = this.signMsg(channel, timestamp, expiration);
             this.deferred.resolve({
                 result: true,
-                body: { signature: sig, id, timestamp, expiration }
+                body: { signature: sig, channel, timestamp, expiration }
             });
         } else {
             this.deferred.reject(payload);
