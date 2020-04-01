@@ -49,6 +49,7 @@ class SocketMap {
         this.browserSocket = socket;
         this.browserPubkey = pubkey;
         this.channel = genChannel();
+        this.setSessionListners();
         return { result: true, channel: this.channel };
     };
 
@@ -78,6 +79,7 @@ class SocketMap {
 
         this.mobileSocket = socket;
         this.init();
+        this.setSessionListners();
         return { result: true };
     };
 
@@ -110,6 +112,11 @@ class SocketMap {
         );
         this.browserSocket?.removeAllListeners(this.channel);
         this.mobileSocket?.removeAllListeners(this.channel);
+        this.browserSocket?.addListener(this.channel, this.browserListener);
+        this.mobileSocket?.addListener(this.channel, this.mobileListener);
+    };
+
+    setSessionListners = (): void => {
         this.browserSocket?.removeAllListeners("session");
         this.mobileSocket?.removeAllListeners("session");
         this.browserSocket?.addListener("session", () =>
@@ -118,8 +125,6 @@ class SocketMap {
         this.mobileSocket?.addListener("session", () =>
             this.sessionListener(this.mobileSocket!)
         );
-        this.browserSocket?.addListener(this.channel, this.browserListener);
-        this.mobileSocket?.addListener(this.channel, this.mobileListener);
     };
 
     browserListener = (payload: any): void => {
