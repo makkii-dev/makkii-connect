@@ -106,12 +106,16 @@ class ConnectorAdapter {
             if (this.socket.disconnected) {
                 reject("connect colsed");
             } else {
+                const timer = setTimeout(() => {
+                    reject("timeout");
+                }, 5000);
                 const listener = (payload: {
                     connect: boolean;
                     browser: any;
                     mobile: any;
                 }): void => {
                     const { connect, ...rest } = payload;
+                    clearTimeout(timer);
                     if (connect) {
                         resolve(rest);
                     } else {
