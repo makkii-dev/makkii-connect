@@ -3,11 +3,13 @@ import { Server } from "http";
 import Express from "express";
 import socketio from "socket.io";
 import SocketMap from "./socketMap";
+import { listenPort } from "./constant.json";
+
 const app = Express();
 const server = new Server(app);
 const soc = socketio(server);
 
-server.listen(8888);
+server.listen(listenPort);
 
 const Maps: Map<string, SocketMap> = new Map();
 

@@ -1,5 +1,4 @@
-import ConnectorAdapter, { Deferred } from "./connectorAdapter";
-import SocketIOClientStatic from "socket.io-client";
+import ConnectorAdapter, { Deferred } from "@makkii-connector/base-connector";
 
 class MobileConnectorAdapter extends ConnectorAdapter {
     isConnectToServer = false;

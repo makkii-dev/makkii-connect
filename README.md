@@ -6,7 +6,7 @@
 
 ```bash
 # start server
-ts-node src/index.ts
+ts-node packages/server/src/index.ts
 # start browser
 ts-node example/browser.ts
 # start mobile

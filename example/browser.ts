@@ -1,4 +1,4 @@
-import BrowserConnectorAdapter from "../src/connectors/browserConnectorAdapter";
+import BrowserConnectorAdapter from "../packages/browser";
 import io from "socket.io-client";
 import repl from "repl";
 

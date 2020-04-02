@@ -1,4 +1,4 @@
-import MobileConnectorAdapter from "../src/connectors/mobileConnectorAdapter";
+import MobileConnectorAdapter from "../packages/mobile";
 import io from "socket.io-client";
 import repl from "repl";
 

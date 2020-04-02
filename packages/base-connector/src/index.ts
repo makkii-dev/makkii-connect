@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import SocketIOClientStatic from "socket.io-client";
 const SYNC_COMMAND = "ADAPTER:SYNC";
 
 enum PayloadStatus {

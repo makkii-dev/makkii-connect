@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Socket } from "socket.io";
-import { genChannel, stripZeroXString, EXPIRATION } from "./utils";
+import { genChannel, stripZeroXString, EXPIRATION } from "./util";
 import nacl from "tweetnacl";
 
 const blake2b = require("blake2b");
