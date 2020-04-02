@@ -3,6 +3,8 @@ import ConnectorAdapter, { Deferred } from "@makkii-connector/base-connector";
 class MobileConnectorAdapter extends ConnectorAdapter {
     isConnectToServer = false;
     deferred = new Deferred();
+    timer = null;
+
     chatBrowser: (...args: any) => Promise<any> = () =>
         Promise.reject("not connect");
 
@@ -22,7 +24,11 @@ class MobileConnectorAdapter extends ConnectorAdapter {
         console.log(msg);
     };
 
-    register = (channel: string, sig: string): Promise<any> => {
+    register = (
+        channel: string,
+        sig: string,
+        timeout = 5 * 1000
+    ): Promise<any> => {
         const payload = {
             from: "mobile",
             channel,
@@ -32,6 +38,9 @@ class MobileConnectorAdapter extends ConnectorAdapter {
         this.socket.emit("register", payload);
         this.socket.removeEventListener("register", this.registerListener);
         this.socket.addEventListener("register", this.registerListener);
+        this.timer = setTimeout(() => {
+            this.deferred.reject("timeout");
+        }, timeout);
         return this.deferred;
     };
 
@@ -46,6 +55,7 @@ class MobileConnectorAdapter extends ConnectorAdapter {
 
     registerListener = (payload: any): void => {
         const { result, body } = payload;
+        clearTimeout(this.timer);
         if (result) {
             const { channel } = body;
             // register success

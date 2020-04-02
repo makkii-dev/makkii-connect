@@ -16,6 +16,8 @@ class BrowserConnectorAdapter extends ConnectorAdapter {
 
     deferred = new Deferred<any>();
 
+    timer = null;
+
     constructor(socket: SocketIOClientStatic["Socket"], priKey?: string) {
         super({ socket, prefix: "browser" });
         if (typeof priKey != "undefined") {
@@ -43,7 +45,7 @@ class BrowserConnectorAdapter extends ConnectorAdapter {
         console.log(msg);
     };
 
-    register = (): Deferred<any> => {
+    register = (timeout = 5 * 1000): Deferred<any> => {
         this.deferred = new Deferred<any>();
         const payload = {
             pubkey: this.pubkey,
@@ -52,6 +54,9 @@ class BrowserConnectorAdapter extends ConnectorAdapter {
         this.socket.emit("register", payload);
         this.socket.removeEventListener("register", this.registerListener);
         this.socket.addEventListener("register", this.registerListener);
+        this.timer = setTimeout(() => {
+            this.deferred.reject("timeout");
+        }, timeout);
         return this.deferred;
     };
 
@@ -67,6 +72,7 @@ class BrowserConnectorAdapter extends ConnectorAdapter {
     registerListener = (payload: any): void => {
         const { result, body } = payload;
         if (result) {
+            clearTimeout(this.timer);
             const { channel, timestamp, expiration } = body;
             this.setChannel(channel);
             this.init();

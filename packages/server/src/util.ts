@@ -23,6 +23,4 @@ const genChannel = (): string => {
     return str.substr(0, 10);
 };
 
-const EXPIRATION = 5 * 60 * 1000;
-
-export { stripZeroXString, genUID, genChannel, EXPIRATION };
+export { stripZeroXString, genUID, genChannel };

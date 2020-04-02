@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Socket } from "socket.io";
-import { genChannel, stripZeroXString, EXPIRATION } from "./util";
+import { genChannel, stripZeroXString } from "./util";
 import nacl from "tweetnacl";
-
+import { expiration_ms as EXPIRATION } from "./constant.json";
 const blake2b = require("blake2b");
 
 type Connector = Socket | undefined;

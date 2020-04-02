@@ -101,14 +101,14 @@ class ConnectorAdapter {
         return this.socket.connected && this.needWait.length === 0;
     };
 
-    getSessionStatus = (): Promise<any> => {
+    getSessionStatus = (timeout = 5 * 1000): Promise<any> => {
         return new Promise((resolve, reject) => {
             if (this.socket.disconnected) {
                 reject("connect colsed");
             } else {
                 const timer = setTimeout(() => {
                     reject("timeout");
-                }, 5000);
+                }, timeout);
                 const listener = (payload: {
                     connect: boolean;
                     browser: any;
