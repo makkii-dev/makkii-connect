@@ -11,7 +11,8 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "target": "es6"
+    "target": "es6",
+    "types":["node", "express", "socket.io-client", "socket.io"]
   },
   "exclude": [
     "packages/**/__tests__/*",
