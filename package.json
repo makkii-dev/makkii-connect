@@ -10,7 +10,7 @@
     "compile": "lerna run tsc",
     "start": "node dist/index.js",
     "clean": "lerna run clean",
-    "postinstall": "lerna bootstrap",
+    "postinstall": "lerna bootstrap && npm run compile",
     "prepublish": "npm run compile"
   },
   "husky": {
