@@ -49,9 +49,6 @@ export class Deferred<T> implements Promise<T> {
     ): Promise<T | TResult> {
         return this.promise.catch(onrejected);
     }
-    finally(onfinally?: (() => void) | null | undefined): Promise<T> {
-        return this.promise.finally(onfinally);
-    }
 }
 
 type Callback = (...data: any[]) => any;

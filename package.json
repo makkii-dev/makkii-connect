@@ -5,9 +5,6 @@
   "main": "lib/index.js",
   "license": "MIT",
   "rootDir": "lib",
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "lint": "eslint packages/**/src/**/*.{js,ts} --fix",
     "compile": "lerna run tsc",
