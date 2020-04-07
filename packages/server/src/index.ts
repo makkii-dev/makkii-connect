@@ -25,6 +25,7 @@ const ServerFactory = (port = listenPort) => {
                 const ret = socketMap.setBrowserSocket(socket, pubkey);
                 if (ret.result) {
                     socketMap.setDisconnectHandler((id: string) => {
+                        console.log("delete channel=>", id);
                         Maps.delete(id);
                     });
                     Maps.set(ret.channel!, socketMap);

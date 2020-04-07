@@ -40,7 +40,7 @@ class SocketMap {
         channel?: string;
         reason?: string;
         timestamp?: number;
-        expiration?: number;
+        expiration?: number | string;
     } => {
         if (
             typeof pubkey !== "string" ||
@@ -53,18 +53,21 @@ class SocketMap {
         this.channel = genChannel();
         this.timestamp = Date.now();
         this.setSessionListners();
-        setTimeout(() => {
-            if (
-                !(
-                    this.browserSocket &&
-                    this.mobileSocket &&
-                    this.browserSocket.connected &&
-                    this.mobileSocket.connected
-                )
-            ) {
-                this.disconnectHandler(this.channel);
-            }
-        }, EXPIRATION);
+        if (EXPIRATION !== "INFINITY") {
+            setTimeout(() => {
+                if (
+                    !(
+                        this.browserSocket &&
+                        this.mobileSocket &&
+                        this.browserSocket.connected &&
+                        this.mobileSocket.connected
+                    )
+                ) {
+                    this.disconnectHandler(this.channel);
+                }
+            }, Number(EXPIRATION));
+        }
+
         return {
             result: true,
             channel: this.channel,
@@ -80,13 +83,15 @@ class SocketMap {
         if (typeof this.browserSocket === "undefined") {
             return { result: false, reason: "seller sokcet not set" };
         }
+        const msg_ =
+            EXPIRATION === "INFINITY"
+                ? this.channel
+                : `${this.channel}:${Math.ceil(
+                      Date.now() / Number(EXPIRATION)
+                  )}`;
 
         const msg = blake2b(32)
-            .update(
-                Buffer.from(
-                    `${this.channel}:${Math.ceil(Date.now() / EXPIRATION)}`
-                )
-            )
+            .update(Buffer.from(msg_))
             .digest();
 
         const res = nacl.sign.detached.verify(

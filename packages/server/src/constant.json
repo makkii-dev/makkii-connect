@@ -1,4 +1,4 @@
 {
     "listenPort": 8888,
-    "expiration_ms": 300000
+    "expiration_ms": "INFINITY"
 }

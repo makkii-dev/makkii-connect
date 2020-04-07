@@ -86,9 +86,17 @@ class BrowserConnectorAdapter extends ConnectorAdapter {
         }
     };
 
-    signMsg = (msg: string, timestamp: number, expiration: number): string => {
+    signMsg = (
+        msg: string,
+        timestamp: number,
+        expiration: number | string
+    ): string => {
+        const msg_ =
+            expiration === "INFINITY"
+                ? msg
+                : `${msg}:${Math.ceil(timestamp / Number(expiration))}`;
         const hash = blake2b(32)
-            .update(Buffer.from(`${msg}:${Math.ceil(timestamp / expiration)}`))
+            .update(Buffer.from(msg_))
             .digest();
         const sig = nacl.sign.detached(hash, Buffer.from(this.priKey, "hex"));
         return Buffer.from(sig).toString("hex");
