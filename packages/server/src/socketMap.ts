@@ -13,7 +13,8 @@ class SocketMap {
     private browserSocket: Connector;
     private mobileSocket: Connector;
     private browserPubkey = "";
-    private timestamp = 0;
+    timestamp = 0;
+    expiration = EXPIRATION;
 
     mobileWaitings: Array<any> = [];
     browserWaitings: Array<any> = [];
@@ -22,14 +23,6 @@ class SocketMap {
 
     setChannel = (channel_: string): void => {
         this.channel = channel_;
-    };
-
-    disconnectHandler = (id: string): void => {
-        console.log("disconnect id:", id);
-    };
-
-    setDisconnectHandler = (handler: DisconnectHandler): void => {
-        this.disconnectHandler = handler;
     };
 
     setBrowserSocket = (
@@ -50,29 +43,16 @@ class SocketMap {
         }
         this.browserSocket = socket;
         this.browserPubkey = pubkey;
-        this.channel = genChannel();
+        const channel = genChannel();
+        this.channel = `${socket.id}:${channel}`;
         this.timestamp = Date.now();
         this.setSessionListners();
-        if (EXPIRATION !== "INFINITY") {
-            setTimeout(() => {
-                if (
-                    !(
-                        this.browserSocket &&
-                        this.mobileSocket &&
-                        this.browserSocket.connected &&
-                        this.mobileSocket.connected
-                    )
-                ) {
-                    this.disconnectHandler(this.channel);
-                }
-            }, Number(EXPIRATION));
-        }
 
         return {
             result: true,
-            channel: this.channel,
+            channel: channel,
             timestamp: this.timestamp,
-            expiration: EXPIRATION
+            expiration: this.expiration
         };
     };
 
@@ -89,7 +69,7 @@ class SocketMap {
                 : `${this.channel}:${Math.ceil(
                       Date.now() / Number(EXPIRATION)
                   )}`;
-
+        console.log("msg_=>", msg_);
         const msg = blake2b(32)
             .update(Buffer.from(msg_))
             .digest();
@@ -105,7 +85,10 @@ class SocketMap {
                 reason: "invalid signture or signature timeout"
             };
         }
-        if (typeof this.mobileSocket != "undefined") {
+        if (
+            typeof this.mobileSocket != "undefined" &&
+            this.mobileSocket.connected
+        ) {
             return { result: false, reason: "this channel already use" };
         }
 
@@ -136,12 +119,6 @@ class SocketMap {
     };
 
     init = (): void => {
-        this.browserSocket?.on("disconnect", () =>
-            this.disconnectHandler(this.channel)
-        );
-        this.mobileSocket?.on("disconnect", () =>
-            this.disconnectHandler(this.channel)
-        );
         this.browserSocket?.removeAllListeners(this.channel);
         this.mobileSocket?.removeAllListeners(this.channel);
         this.browserSocket?.addListener(this.channel, this.browserListener);
@@ -177,13 +154,17 @@ class SocketMap {
         this.sendToBrowser(payload);
     };
 
-    sessionListener = (sender: Socket): void => {
-        if (
+    sessionStatus = (): boolean => {
+        return (
             this.browserSocket &&
             this.mobileSocket &&
             this.browserSocket.connected &&
             this.mobileSocket.connected
-        ) {
+        );
+    };
+
+    sessionListener = (sender: Socket): void => {
+        if (this.sessionStatus()) {
             sender.emit(`session:${this.channel}`, {
                 connect: true,
                 browser: {

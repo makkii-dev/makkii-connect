@@ -171,19 +171,24 @@ class ConnectorAdapter {
             const timer = setTimeout(() => {
                 this.reply(data, "time out", PayloadStatus.fail);
             }, 5000);
-            const result = callback(data.data);
-            if (result && result.then) {
-                result
-                    .then((d: any) => {
-                        this.reply(data, d, PayloadStatus.success);
-                        clearTimeout(timer);
-                    })
-                    .catch((e: any) => {
-                        this.reply(data, e, PayloadStatus.fail);
-                        clearTimeout(timer);
-                    });
-            } else {
-                this.reply(data, result, PayloadStatus.success);
+            try {
+                const result = callback(data.data);
+                if (result && result.then) {
+                    result
+                        .then((d: any) => {
+                            this.reply(data, d, PayloadStatus.success);
+                            clearTimeout(timer);
+                        })
+                        .catch((e: any) => {
+                            this.reply(data, e, PayloadStatus.fail);
+                            clearTimeout(timer);
+                        });
+                } else {
+                    this.reply(data, result, PayloadStatus.success);
+                    clearTimeout(timer);
+                }
+            } catch (err) {
+                this.reply(data, err, PayloadStatus.success);
                 clearTimeout(timer);
             }
         } else {
