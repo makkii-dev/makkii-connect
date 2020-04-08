@@ -249,8 +249,8 @@ class ConnectorAdapter {
     };
 
     define = (command: string, func: Callback): ConnectorAdapter => {
-        this.callbacks.set(command, (...args: any) => {
-            return func(args);
+        this.callbacks.set(command, (args: any) => {
+            return func(...args);
         });
         if (this.isConnect()) {
             this.sync();
