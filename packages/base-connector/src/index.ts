@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 const SYNC_COMMAND = "ADAPTER:SYNC";
-
+const LISTENRER_TIMEOUT = 2 * 60 * 1000;
+const SESSION_TIMEOUT = 5 * 1000;
 enum PayloadStatus {
     success,
     fail,
@@ -101,13 +102,13 @@ class ConnectorAdapter {
         return this.socket.connected && this.needWait.length === 0;
     };
 
-    getSessionStatus = (timeout = 5 * 1000): Promise<any> => {
+    getSessionStatus = (timeout = SESSION_TIMEOUT): Promise<any> => {
         return new Promise((resolve, reject) => {
             if (this.socket.disconnected) {
                 reject("connect colsed");
             } else {
                 const timer = setTimeout(() => {
-                    reject("timeout");
+                    reject("request time out");
                 }, timeout);
                 const listener = (payload: {
                     connect: boolean;
@@ -169,8 +170,8 @@ class ConnectorAdapter {
             // request from b and has bind callback
             const callback = this.callbacks.get(data.command)!;
             const timer = setTimeout(() => {
-                this.reply(data, "time out", PayloadStatus.fail);
-            }, 5000);
+                this.reply(data, "request time out", PayloadStatus.fail);
+            }, LISTENRER_TIMEOUT);
             try {
                 const result = callback(data.data);
                 if (result && result.then) {
