@@ -7,6 +7,14 @@ import { expiration_ms as EXPIRATION } from "./constant.json";
 const blake2b = require("blake2b");
 
 type Connector = Socket | undefined;
+type SessionStatus = {
+    isConnect: boolean; // is connect to mobile
+    isAlive: boolean; // is mobile socket alive
+    isExired: boolean; // is signature expired
+    browserId: string; // browser socket id
+    mobileId: string; // mobile socket id
+};
+
 class SocketMap {
     browserSocket: Connector;
     mobileSocket: Connector;
