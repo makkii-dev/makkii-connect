@@ -16,7 +16,7 @@ interface MsgPayload<T> {
     reply: boolean;
     status: PayloadStatus;
 }
-
+type BindFunction = (...args: any) => Deferred<any>;
 export class Deferred<T> implements Promise<T> {
     readonly [Symbol.toStringTag]: "Promise";
     promise: Promise<T>;
@@ -54,10 +54,6 @@ export class Deferred<T> implements Promise<T> {
         return this.promise.finally(onfinally);
     }
 }
-
-type Callback = (...data: any[]) => any;
-
-type BindFunction = (...args: any) => Deferred<any>;
 
 class ConnectorAdapter {
     private uid = 0;
@@ -102,33 +98,24 @@ class ConnectorAdapter {
         return this.socket.connected && this.needWait.length === 0;
     };
 
-    getSessionStatus = (timeout = SESSION_TIMEOUT): Promise<any> => {
+    getSessionStatus = (timeout = SESSION_TIMEOUT): Promise<SessionStatus> => {
         return new Promise((resolve, reject) => {
             if (this.socket.disconnected) {
-                reject("connect colsed");
+                reject("Unable to connect to server");
             } else {
                 const timer = setTimeout(() => {
-                    reject("request time out");
+                    reject("request to server time out");
                 }, timeout);
-                const listener = (payload: {
-                    connect: boolean;
-                    browser: any;
-                    mobile: any;
-                }): void => {
-                    const { connect, ...rest } = payload;
+                const listener = (payload: SessionStatus): void => {
                     clearTimeout(timer);
-                    if (connect) {
-                        resolve(rest);
-                    } else {
-                        reject("session not open or be closed");
-                    }
+                    resolve(payload);
                 };
                 this.socket.removeEventListener(`session:${this.channel}`);
                 this.socket.addEventListener(
                     `session:${this.channel}`,
                     listener
                 );
-                this.socket.emit(`session:${this.channel}`, {});
+                this.socket.emit(`session:${this.channel}`);
             }
         });
     };
@@ -257,6 +244,10 @@ class ConnectorAdapter {
             this.sync();
         }
         return this;
+    };
+
+    disconnectChannel = (): void => {
+        this.socket.emit(`disconnect:${this.channel}`);
     };
 }
 

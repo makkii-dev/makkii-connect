@@ -11,12 +11,13 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
-    "target": "es6"
+    "target": "es6",
   },
   "exclude": [
     "packages/**/__tests__/*",
     "**/*.spec.ts",
     "node_modules",
-    "example"
+    "example",
+    "types"
   ]
 }

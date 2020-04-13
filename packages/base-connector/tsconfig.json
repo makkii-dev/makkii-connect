@@ -3,7 +3,7 @@
     "compilerOptions": {
       "outDir": "./lib",
       "declarationDir": "./lib/typings",
-      "types":["node", "socket.io-client"]
+      "types":["node", "socket.io-client", "../../types"]
     },
     "include": [
       "./src",

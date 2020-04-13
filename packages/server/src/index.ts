@@ -21,28 +21,6 @@ const ServerFactory = (port = listenPort): Map<string, BrowserMap> => {
         Maps.delete(id);
     };
 
-    const isExpired = (socketMap: SocketMap): boolean => {
-        if (socketMap.expiration === "INFINITY") {
-            return false;
-        }
-        const expiration = socketMap.timestamp + Number(socketMap.expiration);
-        return Date.now() > expiration;
-    };
-
-    const isActive = (socketMap: SocketMap): boolean => {
-        return socketMap.sessionStatus();
-    };
-
-    const clearExpiredAndInactive = (): void => {
-        for (const browserMap of Maps.values()) {
-            for (const [channel, socketMap] of browserMap.entries()) {
-                if (isExpired(socketMap) && !isActive(socketMap)) {
-                    browserMap.delete(channel);
-                }
-            }
-        }
-    };
-
     soc.on("connection", socket => {
         console.log("conn", socket.id);
         socket.on("register", (payload: any) => {
@@ -53,16 +31,17 @@ const ServerFactory = (port = listenPort): Map<string, BrowserMap> => {
                 const socketMap = new SocketMap();
                 const ret = socketMap.setBrowserSocket(socket, pubkey);
                 if (ret.result) {
-                    const browserMap: BrowserMap =
-                        Maps.get(socket.id) || new Map();
-                    browserMap.set(ret.channel!, socketMap);
-                    Maps.set(socket.id, browserMap);
-
                     // when disconnect remove browser
                     socket.removeAllListeners("disconnect");
                     socket.addListener("disconnect", () =>
                         clearBrowserMapById(socket.id)
                     );
+
+                    // remove others connect
+                    const browserMap: BrowserMap = new Map();
+
+                    browserMap.set(ret.channel!, socketMap);
+                    Maps.set(socket.id, browserMap);
 
                     socket.emit("register", {
                         result: true,
@@ -86,7 +65,7 @@ const ServerFactory = (port = listenPort): Map<string, BrowserMap> => {
                 if (typeof socketMap === "undefined") {
                     socket.emit("register", {
                         result: false,
-                        body: "socketMap not found"
+                        body: "connection not found"
                     });
                 } else {
                     const ret = socketMap.setMobileSocket(socket, signature);
@@ -104,8 +83,6 @@ const ServerFactory = (port = listenPort): Map<string, BrowserMap> => {
                         });
                     }
                 }
-                // remove expired and inactive session
-                clearExpiredAndInactive();
             }
         });
     });

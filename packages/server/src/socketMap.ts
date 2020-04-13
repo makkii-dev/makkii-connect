@@ -7,17 +7,15 @@ import { expiration_ms as EXPIRATION } from "./constant.json";
 const blake2b = require("blake2b");
 
 type Connector = Socket | undefined;
-type DisconnectHandler = (id: string) => void;
-
 class SocketMap {
-    private browserSocket: Connector;
-    private mobileSocket: Connector;
+    browserSocket: Connector;
+    mobileSocket: Connector;
     private browserPubkey = "";
-    timestamp = 0;
-    expiration = EXPIRATION;
+    private timestamp = 0; // map init timestamp, use to calculate signature message
+    private expiration = EXPIRATION; // signature exipiration
 
-    mobileWaitings: Array<any> = [];
-    browserWaitings: Array<any> = [];
+    private mobileWaitings: Array<any> = [];
+    private browserWaitings: Array<any> = [];
 
     channel = "";
 
@@ -69,7 +67,6 @@ class SocketMap {
                 : `${this.channel}:${Math.ceil(
                       Date.now() / Number(EXPIRATION)
                   )}`;
-        console.log("msg_=>", msg_);
         const msg = blake2b(32)
             .update(Buffer.from(msg_))
             .digest();
@@ -123,6 +120,16 @@ class SocketMap {
         this.mobileSocket?.removeAllListeners(this.channel);
         this.browserSocket?.addListener(this.channel, this.browserListener);
         this.mobileSocket?.addListener(this.channel, this.mobileListener);
+
+        // disconnect
+        this.browserSocket?.removeAllListeners(`disconnect:${this.channel}`);
+        this.mobileSocket?.removeAllListeners(`disconnect:${this.channel}`);
+        this.browserSocket?.addListener(`disconnect:${this.channel}`, () =>
+            this.disconnectChannel()
+        );
+        this.mobileSocket?.addListener(`disconnect:${this.channel}`, () =>
+            this.disconnectChannel()
+        );
     };
 
     setSessionListners = (): void => {
@@ -154,32 +161,30 @@ class SocketMap {
         this.sendToBrowser(payload);
     };
 
-    sessionStatus = (): boolean => {
-        return (
-            this.browserSocket &&
-            this.mobileSocket &&
-            this.browserSocket.connected &&
-            this.mobileSocket.connected
-        );
+    getSessionStatus = (): SessionStatus => {
+        const isConnect = !!(this.browserSocket && this.mobileSocket);
+        const isAlive = !isConnect
+            ? false
+            : this.browserSocket.connected && this.mobileSocket.connected;
+        const isExired =
+            this.expiration === "INFINITY"
+                ? true
+                : Number(this.expiration) + this.timestamp < Date.now();
+        return {
+            isAlive,
+            isConnect,
+            isExired,
+            browserId: this.browserSocket?.id,
+            mobileId: this.mobileSocket?.id
+        };
     };
 
     sessionListener = (sender: Socket): void => {
-        if (this.sessionStatus()) {
-            sender.emit(`session:${this.channel}`, {
-                connect: true,
-                browser: {
-                    id: this.browserSocket.id,
-                    pendingTxLen: this.browserWaitings.length
-                },
-                mobile: {
-                    id: this.mobileSocket.id,
-                    pendingTxLen: this.mobileWaitings.length
-                }
-            });
-        }
-        sender.emit(`session:${this.channel}`, {
-            connect: false
-        });
+        sender.emit(`session:${this.channel}`, this.getSessionStatus());
+    };
+
+    disconnectChannel = (): void => {
+        this.mobileSocket = undefined;
     };
 }
 
