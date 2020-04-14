@@ -112,7 +112,7 @@ class ConnectorAdapter {
     getSessionStatus = (timeout = SESSION_TIMEOUT): Promise<SessionStatus> => {
         return new Promise((resolve, reject) => {
             if (this.socket.disconnected) {
-                reject("Unable to connect to server");
+                return reject("Unable to connect to server");
             } else {
                 const timer = setTimeout(() => {
                     reject("request to server time out");

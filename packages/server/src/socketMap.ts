@@ -144,10 +144,10 @@ class SocketMap {
         this.browserSocket?.removeAllListeners(`session:${this.channel}`);
         this.mobileSocket?.removeAllListeners(`session:${this.channel}`);
         this.browserSocket?.addListener(`session:${this.channel}`, () =>
-            this.sessionListener(this.browserSocket!)
+            this.sessionListener(this.browserSocket)
         );
         this.mobileSocket?.addListener(`session:${this.channel}`, () =>
-            this.sessionListener(this.mobileSocket!)
+            this.sessionListener(this.mobileSocket)
         );
     };
 
@@ -187,8 +187,8 @@ class SocketMap {
         };
     };
 
-    sessionListener = (sender: Socket): void => {
-        sender.emit(`session:${this.channel}`, this.getSessionStatus());
+    sessionListener = (sender?: Socket): void => {
+        sender?.emit(`session:${this.channel}`, this.getSessionStatus());
     };
 
     disconnectChannel = (): void => {
