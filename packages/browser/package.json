@@ -1,6 +1,6 @@
 {
   "name": "@makkii/browser-connector",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "> TODO: description",
   "author": "Chengchcc <chen@aion.network>",
   "homepage": "https://github.com/makkii-dev/makkii-connect#readme",
@@ -30,7 +30,7 @@
     "url": "https://github.com/makkii-dev/makkii-connect/issues"
   },
   "dependencies": {
-    "@makkii/base-connector": "^0.1.0",
+    "@makkii/base-connector": "^0.1.1",
     "@types/socket.io-client": "^1.4.32",
     "blake2b": "^2.1.3",
     "socket.io-client": "^2.3.0",
