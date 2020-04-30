@@ -16,11 +16,6 @@ const ServerFactory = (port = listenPort): Map<string, BrowserMap> => {
 
     const Maps: Map<string, BrowserMap> = new Map();
 
-    // handelers
-    const clearBrowserMapById = (id: string): void => {
-        Maps.delete(id);
-    };
-
     soc.on("connection", socket => {
         console.log("conn", socket.id);
         socket.on("register", (payload: any) => {
@@ -34,7 +29,7 @@ const ServerFactory = (port = listenPort): Map<string, BrowserMap> => {
                     // when disconnect remove browser
                     socket.removeAllListeners("disconnect");
                     socket.addListener("disconnect", () =>
-                        clearBrowserMapById(socket.id)
+                        Maps.delete(socket.id)
                     );
 
                     // remove others connect
@@ -42,6 +37,9 @@ const ServerFactory = (port = listenPort): Map<string, BrowserMap> => {
 
                     browserMap.set(ret.channel!, socketMap);
                     Maps.set(socket.id, browserMap);
+
+                    socketMap.suicide = (id, channel): boolean =>
+                        Maps.get(id)?.delete(channel);
 
                     socket.emit("register", {
                         result: true,

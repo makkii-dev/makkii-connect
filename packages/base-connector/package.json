@@ -1,5 +1,5 @@
 {
-  "name": "@makkii-connector/base-connector",
+  "name": "@makkii/base-connector",
   "version": "0.1.0",
   "description": "> TODO: description",
   "author": "Chengchcc <chen@aion.network>",
@@ -32,5 +32,6 @@
   "dependencies": {
     "@types/socket.io-client": "^1.4.32",
     "socket.io-client": "^2.3.0"
-  }
+  },
+  "gitHead": "b3f2b36faeac3bb3e1acf29c4878d7cdc2b1988c"
 }

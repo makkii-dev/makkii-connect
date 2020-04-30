@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { Socket } from "socket.io";
@@ -26,6 +27,8 @@ class SocketMap {
     private browserWaitings: Array<any> = [];
 
     channel = "";
+
+    suicide = (mapId, channel) => {};
 
     setChannel = (channel_: string): void => {
         this.channel = channel_;
@@ -192,7 +195,10 @@ class SocketMap {
     };
 
     disconnectChannel = (): void => {
+        this.mobileSocket.emit(`disconnect:${this.channel}`, {});
+        this.browserSocket.emit(`disconnect:${this.channel}`, {});
         this.mobileSocket = undefined;
+        this.suicide(this.browserSocket.id, this.channel);
     };
 }
 

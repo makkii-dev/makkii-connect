@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "socket-bridge",
+  "name": "makkii-connector",
   "version": "1.0.0",
   "main": "lib/index.js",
   "license": "MIT",

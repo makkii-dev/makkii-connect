@@ -1,5 +1,5 @@
 {
-  "name": "@makkii-connector/server",
+  "name": "@makkii/connector-server",
   "version": "0.1.0",
   "description": "connector server",
   "author": "Chengchcc <chen@aion.network>",
@@ -37,5 +37,6 @@
     "express": "^4.17.1",
     "socket.io": "^2.3.0",
     "tweetnacl": "^1.0.3"
-  }
+  },
+  "gitHead": "b3f2b36faeac3bb3e1acf29c4878d7cdc2b1988c"
 }

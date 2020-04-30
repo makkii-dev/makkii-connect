@@ -1,5 +1,5 @@
 {
-  "name": "@makkii-connector/mobile",
+  "name": "@makkii/mobile-connector",
   "version": "0.1.0",
   "description": "mobile connector",
   "author": "Chengchcc <chen@aion.network>",
@@ -30,8 +30,9 @@
     "url": "https://github.com/makkii-dev/makkii-connect/issues"
   },
   "dependencies": {
-    "@makkii-connector/base-connector": "^0.1.0",
+    "@makkii/base-connector": "^0.1.0",
     "@types/socket.io-client": "^1.4.32",
     "socket.io-client": "^2.3.0"
-  }
+  },
+  "gitHead": "b3f2b36faeac3bb3e1acf29c4878d7cdc2b1988c"
 }

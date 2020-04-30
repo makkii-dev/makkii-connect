@@ -85,6 +85,8 @@ class ConnectorAdapter {
 
     private __sync: BindFunction | undefined;
 
+    onDisconnect = () => {};
+
     constructor(opts: {
         prefix: string;
         socket: SocketIOClientStatic["Socket"];
@@ -103,6 +105,9 @@ class ConnectorAdapter {
         this.socket.addEventListener(this.channel!, this.listener);
         this.__sync = this.bind(SYNC_COMMAND);
         this.define(SYNC_COMMAND, this._sync);
+        this.socket.addEventListener(`disconnect:${this.channel}`, () =>
+            this.onDisconnect()
+        );
     };
 
     private isConnect = (): boolean => {
