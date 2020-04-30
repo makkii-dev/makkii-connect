@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import ConnectorAdapter, { Deferred } from "@makkii-connector/base-connector";
+import ConnectorAdapter, { Deferred } from "@makkii/base-connector";
 import { stripZeroXString } from "./util";
 import nacl from "tweetnacl";
 const blake2b = require("blake2b");

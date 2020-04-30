@@ -1,4 +1,4 @@
-import ConnectorAdapter, { Deferred } from "@makkii-connector/base-connector";
+import ConnectorAdapter, { Deferred } from "@makkii/base-connector";
 
 class MobileConnectorAdapter extends ConnectorAdapter {
     isConnectToServer = false;
