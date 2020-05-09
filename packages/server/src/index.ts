@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Server } from "http";
+import Http from "http";
+import Https from "https";
+import Path from "path";
+import fs from "fs";
 import Express from "express";
 import socketio from "socket.io";
 import SocketMap from "./socketMap";
@@ -7,9 +10,24 @@ import { listenPort } from "./constant.json";
 
 type BrowserMap = Map<string, SocketMap>;
 
-const ServerFactory = (port = listenPort): Map<string, BrowserMap> => {
+const createCredentials = (path): { key: any; cert: any } => {
+    const privateKey = fs.readFileSync(
+        Path.resolve(path, "private.pem"),
+        "utf8"
+    );
+    const certificate = fs.readFileSync(Path.resolve(path, "file.crt"), "utf8");
+    return { key: privateKey, cert: certificate };
+};
+
+const ServerFactory = (
+    port = listenPort,
+    secure = false,
+    keyPath = ""
+): Map<string, BrowserMap> => {
     const app = Express();
-    const server = new Server(app);
+    const server = secure
+        ? Https.createServer(createCredentials(keyPath), app)
+        : Http.createServer(app);
     const soc = socketio(server);
 
     server.listen(port);

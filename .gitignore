@@ -4,3 +4,5 @@ cookie.json
 node_modules
 yarn-error.log
 lerna-debug.log
+*.pem
+*.crt
