@@ -46,9 +46,10 @@ const ServerFactory = (
                 if (ret.result) {
                     // when disconnect remove browser
                     socket.removeAllListeners("disconnect");
-                    socket.addListener("disconnect", () =>
-                        Maps.delete(socket.id)
-                    );
+                    socket.addListener("disconnect", () => {
+                        socketMap.disconnectChannel();
+                        Maps.delete(socket.id);
+                    });
 
                     // remove others connect
                     const browserMap: BrowserMap = new Map();
